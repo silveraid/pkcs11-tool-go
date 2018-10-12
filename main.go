@@ -74,6 +74,7 @@ func main() {
 	slotPin := flag.String("pin", "98765432", "Slot PIN")
 	action := flag.String("action", "list", "list,import,generate,generateAndImport,generateSecret,generateAES,generateDES,unwrapECWithDES3,wrapKeyWithDES3,getSKI,SignHMAC384,TestAESGCM,generateCSR,importCert,deleteObj")
 	keyFile := flag.String("keyFile", "/some/dir/key.pem)", "path to key you want to import or getSKI")
+	keyValue := flag.String("keyValue", "", "ASCII HEX encoded symmetric key for importing")
 	keyType := flag.String("keyType", "EC", "Type of key (EC,RSA,GENERIC_SECRET,AES,SHA256_HMAC,SHA384_HMAC,DES3)")
 	keyLen := flag.Int("keyLen", 32, "Key Length for CKK_GENERIC_SECRET (32,48,...)")
 	keyLabel := flag.String("keyLabel", "tmpkey", "Label of CKK_GENERIC_SECRET")
@@ -154,9 +155,28 @@ func main() {
 		if *keyType == "RSA" {
 			err = p11w.ImportRSAKeyFromFile(*keyFile, *keyStore)
 			exitWhenError(err)
-		} else {
+		} else if *keyType == "EC" {
 			err = p11w.ImportECKeyFromFile(*keyFile, *keyStore, *keyStorepass, *keyLabel)
 			exitWhenError(err)
+		} else if *keyType == "GENERIC_SECRET" || *keyType == "SHA256_HMAC" ||
+			*keyType == "SHA384_HMAC" {
+
+			// input validation
+			if *keyValue  == "" {
+				fmt.Println("FATAL: value for keyValue must be set to import symmetric key")
+				os.Exit(1)
+			}
+
+			err = p11w.ImportSymmetricKey(*keyLabel, *keyType, *keyValue)
+
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		} else {
+			fmt.Print("FATAL: unsupported keyType (%v) for action %v\n",
+				*keyType, *action)
+			os.Exit(1)
 		}
 
 	case "importCert":
@@ -342,7 +362,6 @@ func main() {
 				[]*pkcs11.Attribute{},
 				 *maxObjectsToList,
 			)
-
 		}
 
 	case "generateDES":

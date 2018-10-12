@@ -1,0 +1,6 @@
+# ignoring editor's folder
+.idea
+
+# ignoring compiled binary
+p11tool-new
+
