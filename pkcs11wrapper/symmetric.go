@@ -1,11 +1,12 @@
 package pkcs11wrapper
 
 import (
+	"bytes"
+	"encoding/hex"
 	"github.com/miekg/pkcs11"
 	"github.com/pkg/errors"
 	"os"
 	"strconv"
-	"bytes"
 )
 
 func (p11w *Pkcs11Wrapper) CreateSymKey(objectLabel string, keyLen int, keyType string) (aesKey pkcs11.ObjectHandle, err error) {
@@ -45,7 +46,7 @@ func (p11w *Pkcs11Wrapper) CreateSymKey(objectLabel string, keyLen int, keyType 
 	//}
 
 	// get the required attributes
-	requiredAttributes := p11w.GetSymPkcs11Template(objectLabel, keyLen, keyType, "")
+	requiredAttributes := p11w.GetSymPkcs11Template(objectLabel, keyLen, keyType)
 
 	// generate the aes key
 	aesKey, err = p11w.Context.GenerateKey(
@@ -64,8 +65,8 @@ func (p11w *Pkcs11Wrapper) CreateSymKey(objectLabel string, keyLen int, keyType 
 }
 
 /* return a set of attributes that we require for our aes key */
-func (p11w *Pkcs11Wrapper) GetSymPkcs11Template(objectLabel string,
-	keyLen int, keyType string, keyValue string) (SymPkcs11Template []*pkcs11.Attribute) {
+func (p11w *Pkcs11Wrapper) GetSymPkcs11Template(objectLabel string, keyLen int,
+	keyType string) (SymPkcs11Template []*pkcs11.Attribute) {
 
 	// default CKA_KEY_TYPE
 	var pkcs11VendorAttr []*pkcs11.Attribute
@@ -213,11 +214,6 @@ func (p11w *Pkcs11Wrapper) GetSymPkcs11Template(objectLabel string,
 	}
 	SymPkcs11Template = append(SymPkcs11Template, pkcs11VendorAttr...)
 
-	// Setting a key value if specified
-	if keyValue != "" {
-		SymPkcs11Template = append(SymPkcs11Template, pkcs11.NewAttribute(pkcs11.CKA_VALUE, keyValue))
-	}
-
 	return
 }
 
@@ -316,10 +312,21 @@ func (p11w *Pkcs11Wrapper) ImportSymmetricKey(objectLabel, keyType, keyValue str
 	}
 
 	// generating a key template
-	keyTemplate := p11w.GetSymPkcs11Template(objectLabel, len(keyValue) / 2, keyType, keyValue)
+	keyTemplate := p11w.GetSymPkcs11Template(objectLabel, len(keyValue) / 2, keyType)
+
+	// converting ASCII HEX string to byte array
+	keyValueBytes, err := hex.DecodeString(keyValue)
+
+	if err != nil {
+		return errors.Errorf("FATAL: ImportSymmetricKey unable to convert " +
+			"keyValue to byte array, %v", err)
+	}
+
+	// extending the template with the key value
+	keyTemplate = append(keyTemplate, pkcs11.NewAttribute(pkcs11.CKA_VALUE, keyValueBytes))
 
 	// trying to create the object in the HSM
-	_, err := p11w.Context.CreateObject(p11w.Session, keyTemplate)
+	_, err = p11w.Context.CreateObject(p11w.Session, keyTemplate)
 
 	// problem
 	if err != nil {
