@@ -16,8 +16,8 @@ import (
 	"fmt"
 	"github.com/cloudflare/cfssl/csr" //"github.com/cloudflare/cfssl/log"
 	"github.com/cloudflare/cfssl/helpers"
-	"github.com/hyperledger/fabric/bccsp/utils"
-	"github.com/miekg/pkcs11"
+	utils "github.com/hyperledger/fabric-lib-go/bccsp/utils"
+	pkcs11 "github.com/miekg/pkcs11"
 	"github.com/olekukonko/tablewriter"
 	"io"
 	"io/ioutil"
@@ -149,8 +149,8 @@ type AttributeRequest struct {
 }
 
 type NewMechanism struct {
-	p11Mech		uint
-	mechParam	[]byte
+	p11Mech   uint
+	mechParam []byte
 }
 
 const (
@@ -199,16 +199,16 @@ func init() {
 
 	//Setup Mechanism MAP as String
 	CKM_MECH_MAP = map[string]uint{
-		"CKM_AES_CBC_PAD": pkcs11.CKM_AES_CBC_PAD,
+		"CKM_AES_CBC_PAD":      pkcs11.CKM_AES_CBC_PAD,
 		"CKM_AES_KEY_WRAP_PAD": pkcs11.CKM_AES_KEY_WRAP_PAD,
-		"CKM_AES_KEY_WRAP": pkcs11.CKM_AES_KEY_WRAP,
+		"CKM_AES_KEY_WRAP":     pkcs11.CKM_AES_KEY_WRAP,
 	}
 
 	//Setup NewMechanism MAP as String
 	CKM_NEWMECH_MAP = map[string]NewMechanism{
-		"CKM_AES_CBC_PAD": {pkcs11.CKM_AES_CBC_PAD, make([]byte, 16)},
+		"CKM_AES_CBC_PAD":      {pkcs11.CKM_AES_CBC_PAD, make([]byte, 16)},
 		"CKM_AES_KEY_WRAP_PAD": {pkcs11.CKM_AES_KEY_WRAP_PAD, make([]byte, 16)},
-		"CKM_AES_KEY_WRAP": {pkcs11.CKM_AES_KEY_WRAP, nil},
+		"CKM_AES_KEY_WRAP":     {pkcs11.CKM_AES_KEY_WRAP, nil},
 	}
 }
 
@@ -344,7 +344,7 @@ func FindSlotByLabel(p *pkcs11.Ctx, slotLabel string) (slot uint, index int, err
 	return
 }
 
-//DeleteObj Delete Objects from PKCS11 Token
+// DeleteObj Delete Objects from PKCS11 Token
 func (p11w *Pkcs11Wrapper) DeleteObj(objClass string, keyLabel string) (err error) {
 	var keyTemplate []*pkcs11.Attribute
 	if objClass == "ALL" {
@@ -553,7 +553,7 @@ func decodeP11Class(s string) uint {
 }
 
 func decodeP11Mech(s string, t string) NewMechanism {
-        var defaultMech NewMechanism
+	var defaultMech NewMechanism
 	switch t {
 	case "DES3":
 		defaultMech = NewMechanism{pkcs11.CKM_DES3_CBC_PAD, make([]byte, 8)}
@@ -565,7 +565,7 @@ func decodeP11Mech(s string, t string) NewMechanism {
 	val, present := CKM_NEWMECH_MAP[s]
 	if present {
 		return val
-	}else{
+	} else {
 		return defaultMech
 	}
 }
@@ -844,22 +844,21 @@ func (p11w *Pkcs11Wrapper) ImportECKeyFromFile(file string, keyStore string, key
 
 }
 
-//UnWrapRSAKeyFromFile takes a RSA Key from file imput and unwraps onto an HSM
+// UnWrapRSAKeyFromFile takes a RSA Key from file imput and unwraps onto an HSM
 func (p11w *Pkcs11Wrapper) UnWrapRSAKeyFromFile(file string, keyStore string, keyStorepass string, keyLabel string, w pkcs11.ObjectHandle) (err error) {
 	// read in key from file
 	//ec := EcdsaKey{}
 	var rsa RsaKey
-	
 
 	//err = ec.ImportPrivKeyFromFile(file)
 	switch keyStore {
 	/*case "p12":
-		ec = EcdsaKey{}
-		ec.keyLabel = keyLabel
-		err = ec.ImportPrivKeyFromP12(file, keyStorepass)
-		if err != nil {
-			return err
-		}*/
+	ec = EcdsaKey{}
+	ec.keyLabel = keyLabel
+	err = ec.ImportPrivKeyFromP12(file, keyStorepass)
+	if err != nil {
+		return err
+	}*/
 	default:
 		rsa = RsaKey{}
 		rsa.keyLabel = keyLabel
@@ -892,7 +891,7 @@ func (p11w *Pkcs11Wrapper) UnWrapRSAKeyFromFile(file string, keyStore string, ke
 	return
 }
 
-//WrapECKey Wraps an EC Key
+// WrapECKey Wraps an EC Key
 func (p11w *Pkcs11Wrapper) WrapRSAKey(rsa *RsaKey, w pkcs11.ObjectHandle) (wrappedKey []byte, err error) {
 	if rsa.PrivKey == nil {
 		err = errors.New("no key to WRAP")
@@ -947,9 +946,8 @@ func (p11w *Pkcs11Wrapper) WrapRSAKey(rsa *RsaKey, w pkcs11.ObjectHandle) (wrapp
 	return
 }
 
-//UnwrapRSAKeye EC Key Wrapped with DES3 Key
+// UnwrapRSAKeye EC Key Wrapped with DES3 Key
 func (p11w *Pkcs11Wrapper) UnwrapRSAKey(rsa RsaKey, w pkcs11.ObjectHandle, wrappedKey []byte, keyLabel string) (err error) {
-
 
 	// pubkey import
 	pubExpBytes := big.NewInt(int64(rsa.PubKey.E)).Bytes()
@@ -1029,7 +1027,7 @@ func (p11w *Pkcs11Wrapper) UnwrapRSAKey(rsa RsaKey, w pkcs11.ObjectHandle, wrapp
 
 }
 
-//UnWrapECKeyFromFile takes a EC Key from file imput and unwraps onto an HSM
+// UnWrapECKeyFromFile takes a EC Key from file imput and unwraps onto an HSM
 func (p11w *Pkcs11Wrapper) UnWrapECKeyFromFile(file string, keyStore string, keyStorepass string, keyLabel string, w pkcs11.ObjectHandle) (err error) {
 	// read in key from file
 	//ec := EcdsaKey{}
@@ -1076,7 +1074,7 @@ func (p11w *Pkcs11Wrapper) UnWrapECKeyFromFile(file string, keyStore string, key
 	return
 }
 
-//WrapECKey Wraps an EC Key
+// WrapECKey Wraps an EC Key
 func (p11w *Pkcs11Wrapper) WrapECKey(ec EcdsaKey, w pkcs11.ObjectHandle) (wrappedKey []byte, err error) {
 	if ec.PrivKey == nil {
 		err = errors.New("no key to WRAP")
@@ -1132,7 +1130,7 @@ func (p11w *Pkcs11Wrapper) WrapECKey(ec EcdsaKey, w pkcs11.ObjectHandle) (wrappe
 	return
 }
 
-//UnwrapECKeye EC Key Wrapped with DES3 Key
+// UnwrapECKeye EC Key Wrapped with DES3 Key
 func (p11w *Pkcs11Wrapper) UnwrapECKey(ec EcdsaKey, w pkcs11.ObjectHandle, wrappedKey []byte, keyLabel string, marshaledOID []byte) (err error) {
 
 	ec.GenSKI()
@@ -1276,12 +1274,12 @@ func (p11w *Pkcs11Wrapper) WrapP11Key(wrapKeyType string, objClass string, keyLa
 		switch wrapKeyType {
 		case "DES3":
 			myMech := decodeP11Mech(mechOver, "DES3")
-			fmt.Printf("selected mechanism %v\n",decodeP11Mech(mechOver, "DES3"))
+			fmt.Printf("selected mechanism %v\n", decodeP11Mech(mechOver, "DES3"))
 			wrappedKey, err = p11w.Context.WrapKey(
 				p11w.Session,
 				[]*pkcs11.Mechanism{
 					pkcs11.NewMechanism(myMech.p11Mech, myMech.mechParam),
-				//	pkcs11.NewMechanism(pkcs11.CKM_DES3_CBC_PAD, make([]byte, 8)),
+					//	pkcs11.NewMechanism(pkcs11.CKM_DES3_CBC_PAD, make([]byte, 8)),
 				},
 				w,
 				p11ObjHandlers[0],
@@ -1294,7 +1292,7 @@ func (p11w *Pkcs11Wrapper) WrapP11Key(wrapKeyType string, objClass string, keyLa
 			}
 		case "AES":
 			myMech := decodeP11Mech(mechOver, "AES")
-			fmt.Printf("selected mechanism %v\n",decodeP11Mech(mechOver, "AES"))
+			fmt.Printf("selected mechanism %v\n", decodeP11Mech(mechOver, "AES"))
 			wrappedKey, err = p11w.Context.WrapKey(
 				p11w.Session,
 				[]*pkcs11.Mechanism{
@@ -1635,7 +1633,7 @@ func (p11w *Pkcs11Wrapper) signECDSA(k EcdsaKey, digest []byte) (signature []byt
 		return nil, err
 	}
 
-	s, _, err = utils.ToLowS(k.PubKey, s)
+	s, err = utils.ToLowS(k.PubKey, s)
 	if err != nil {
 		return nil, err
 	}
@@ -1968,22 +1966,23 @@ func (p11w *Pkcs11Wrapper) Public() {
 	return
 }
 
-/*TODO Implement CSR Request to call csr.Generate with EC Key from HSM with SKI implementing crypto.signer from Pkcs11Wrapper Struct
-var req = &CertificateRequest{
-	Names: []Name{
-		{
-			C:  "US",
-			ST: "California",
-			L:  "San Francisco",
-			O:  "CloudFlare",
-			OU: "Systems Engineering",
-		},
-	},
-	CN:         "cloudflare.com",
-	Hosts:      []string{"cloudflare.com", "www.cloudflare.com", "192.168.0.1", "jdoe@example.com"},
-	KeyRequest: &BasicP11Request{"ecdsa", 256},
-}
+/*
+TODO Implement CSR Request to call csr.Generate with EC Key from HSM with SKI implementing crypto.signer from Pkcs11Wrapper Struct
 
+	var req = &CertificateRequest{
+		Names: []Name{
+			{
+				C:  "US",
+				ST: "California",
+				L:  "San Francisco",
+				O:  "CloudFlare",
+				OU: "Systems Engineering",
+			},
+		},
+		CN:         "cloudflare.com",
+		Hosts:      []string{"cloudflare.com", "www.cloudflare.com", "192.168.0.1", "jdoe@example.com"},
+		KeyRequest: &BasicP11Request{"ecdsa", 256},
+	}
 */
 func (p11r *BasicP11Request) Generate() {
 	//FAKE the Generate and return a handle to a previously created private key
