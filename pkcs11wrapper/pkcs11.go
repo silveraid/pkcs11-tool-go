@@ -16,7 +16,8 @@ import (
 	"fmt"
 	"github.com/cloudflare/cfssl/csr" //"github.com/cloudflare/cfssl/log"
 	"github.com/cloudflare/cfssl/helpers"
-	"github.com/miekg/pkcs11"
+	utils "github.com/hyperledger/fabric-lib-go/bccsp/utils"
+	pkcs11 "github.com/miekg/pkcs11"
 	"github.com/olekukonko/tablewriter"
 	"io"
 	"io/ioutil"
@@ -1632,12 +1633,12 @@ func (p11w *Pkcs11Wrapper) signECDSA(k EcdsaKey, digest []byte) (signature []byt
 		return nil, err
 	}
 
-	s, err = ToLowS(k.PubKey, s)
+	s, err = utils.ToLowS(k.PubKey, s)
 	if err != nil {
 		return nil, err
 	}
 
-	return MarshalECDSASignature(r, s)
+	return utils.MarshalECDSASignature(r, s)
 }
 
 func (p11w *Pkcs11Wrapper) Sign(k Key, digest []byte) (signature []byte, err error) {

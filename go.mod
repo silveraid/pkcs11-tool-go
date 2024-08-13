@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/google/certificate-transparency-go v1.2.1 // indirect
+	github.com/hyperledger/fabric-lib-go v1.1.2 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	golang.org/x/sys v0.24.0 // indirect
