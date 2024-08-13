@@ -2,8 +2,6 @@ package pkcs11wrapper
 
 import (
 	"crypto" //"errors"
-	//"github.com/hyperledger/fabric/bccsp"
-
 	"github.com/miekg/pkcs11"
 )
 
