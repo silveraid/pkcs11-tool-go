@@ -1,0 +1,53 @@
+name: Build Binaries
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    # Use a matrix to run the three requested target builds on appropriate runners
+    strategy:
+      matrix:
+        include:
+          - name: linux-amd64
+            runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+          - name: mac-arm64
+            runner: macos-latest
+            goos: darwin
+            goarch: arm64
+          - name: mac-amd64
+            runner: macos-latest
+            goos: darwin
+            goarch: amd64
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          echo "Building for $GOOS/$GOARCH on runner $RUNNER_OS"
+          mkdir -p build
+          # Build the main module binary. Adjust output name as needed.
+          go build -v -o build/p11tool-new-${GOOS}-${GOARCH} ./
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }}
