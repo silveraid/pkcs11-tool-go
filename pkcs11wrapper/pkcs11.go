@@ -14,11 +14,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/cloudflare/cfssl/csr" //"github.com/cloudflare/cfssl/log"
-	"github.com/cloudflare/cfssl/helpers"
-	utils "github.com/hyperledger/fabric-lib-go/bccsp/utils"
-	pkcs11 "github.com/miekg/pkcs11"
-	"github.com/olekukonko/tablewriter"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -26,6 +21,13 @@ import (
 	"net/mail"
 	"os"
 	"strings"
+
+	"github.com/cloudflare/cfssl/csr" //"github.com/cloudflare/cfssl/log"
+	"github.com/cloudflare/cfssl/helpers"
+	utils "github.com/hyperledger/fabric-lib-go/bccsp/utils"
+	pkcs11 "github.com/miekg/pkcs11"
+	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 type Pkcs11Library struct {
@@ -406,8 +408,10 @@ func (p11w *Pkcs11Wrapper) ListObjects(template []*pkcs11.Attribute, max int) {
 
 		// prepare table headers
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"COUNT", "CKA_CLASS", "CKA_LABEL", "CKA_ID", "CKA_KEY_TYPE", "CKA_KEY_LEN", "CKA_SUBJECT", "CKA_ISSUER"})
-		table.SetCaption(true, fmt.Sprintf("Total objects found (max %d): %d", max, len(objects)))
+		table.Header([]string{"COUNT", "CKA_CLASS", "CKA_LABEL", "CKA_ID", "CKA_KEY_TYPE", "CKA_KEY_LEN", "CKA_SUBJECT", "CKA_ISSUER"})
+		// Add a footer with the total count
+		caption := fmt.Sprintf("Total objects found (max %d): %d", max, len(objects))
+		table.Caption(tw.Caption{Text: caption, Align: tw.AlignLeft})
 
 		// populate table data
 		for i, k := range objects {
