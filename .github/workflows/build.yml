@@ -39,7 +39,9 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: '0'
+          # CGO needs to be enabled because pkcs11 uses cgo to interface
+          # with the C library!
+          CGO_ENABLED: '1'
         run: |
           echo "Building for $GOOS/$GOARCH on runner $RUNNER_OS"
           mkdir -p build
