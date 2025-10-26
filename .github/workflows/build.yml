@@ -78,6 +78,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -94,14 +95,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
         run: |
-          # Upload each artifact file to the created release via the uploads API
-          for file in artifacts/*; do
-            [ -f "$file" ] || continue
+          # Normalize upload URL by removing the template suffix if present
+          UPLOAD_URL_CLEAN="${UPLOAD_URL%\{?name,label\}}"
+          echo "Using upload URL: $UPLOAD_URL_CLEAN"
+
+          # Find all files under artifacts (download-artifact creates subfolders)
+          find artifacts -type f -print0 | while IFS= read -r -d '' file; do
             fname=$(basename "$file")
             echo "Uploading $fname..."
-            curl -sS -X POST \
+            # Upload and capture HTTP status
+            http_code=$(curl -sS -w "%{http_code}" -o /tmp/curl.out -X POST \
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @"$file" \
-              "$UPLOAD_URL?name=$fname"
+              "$UPLOAD_URL_CLEAN?name=$fname")
+            body=$(cat /tmp/curl.out)
+            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+              echo "Uploaded $fname (status: $http_code)"
+            else
+              echo "Failed uploading $fname (status: $http_code)"
+              echo "$body"
+              exit 1
+            fi
           done
