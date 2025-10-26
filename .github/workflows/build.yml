@@ -69,25 +69,36 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout repository (for release notes)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          
+
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Extract tag name
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          
+
           # Create release
           gh release create "$TAG_NAME" \
             --title "Release $TAG_NAME" \
             --draft=false \
             --prerelease=false \
             --generate-notes
-            
+
           # Upload all artifacts to the release
           find artifacts -type f -name "p11tool-new-*" | while read file; do
             gh release upload "$TAG_NAME" "$file" --clobber
