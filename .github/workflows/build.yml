@@ -74,32 +74,34 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Authenticate GitHub CLI
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "$GITHUB_TOKEN" | gh auth login --with-token
-
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
-      - name: Create Release
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
         run: |
-          # Extract tag name
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-
-          # Create release
-          gh release create "$TAG_NAME" \
-            --title "Release $TAG_NAME" \
-            --draft=false \
-            --prerelease=false \
-            --generate-notes
-
-          # Upload all artifacts to the release
-          find artifacts -type f -name "p11tool-new-*" | while read file; do
-            gh release upload "$TAG_NAME" "$file" --clobber
+          # Upload each artifact file to the created release via the uploads API
+          for file in artifacts/*; do
+            [ -f "$file" ] || continue
+            fname=$(basename "$file")
+            echo "Uploading $fname..."
+            curl -sS -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @"$file" \
+              "$UPLOAD_URL?name=$fname"
           done
