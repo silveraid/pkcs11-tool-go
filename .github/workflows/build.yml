@@ -47,20 +47,21 @@ jobs:
           echo "Building for $GOOS/$GOARCH on runner $RUNNER_OS"
           mkdir -p build
           # Build the main module binary. Adjust output name as needed.
-          go build -v -o build/p11tool-new-${GOOS}-${GOARCH} ./
+          cd cmd/p11tool
+          go build -v -o ../../build/p11tool-${GOOS}-${GOARCH} ./
 
       - name: Generate SHA256 checksum
         run: |
           cd build
-          sha256sum p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }} > p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
+          sha256sum p11tool-${{ matrix.goos }}-${{ matrix.goarch }} > p11tool-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: p11tool-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
-            build/p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }}
-            build/p11tool-new-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
+            build/p11tool-${{ matrix.goos }}-${{ matrix.goarch }}
+            build/p11tool-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
 
   release:
     needs: build
