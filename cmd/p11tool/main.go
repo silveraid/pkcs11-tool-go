@@ -10,7 +10,7 @@ import (
 	"strings" //"github.com/cloudflare/cfssl/csr"
 	//"github.com/cloudflare/cfssl/log"
 	"github.com/miekg/pkcs11"
-	pw "github.com/scottallan/p11tool-new/pkcs11wrapper"
+	pw "github.com/scottallan/p11tool-new/pkg/pkcs11wrapper"
 	"golang.org/x/crypto/ssh/terminal"
 	"os/signal"
 	"syscall"
