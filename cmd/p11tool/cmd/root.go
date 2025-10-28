@@ -46,6 +46,7 @@ var (
 	maxObjects    int
 	message       string
 	mechanism     string
+	lazyDebug     bool
 )
 
 type termInfo struct {
@@ -73,10 +74,11 @@ func Execute() {
 func init() {
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&pkcs11Library, "lib", "", "Location of pkcs11 library")
-	rootCmd.PersistentFlags().StringVar(&slotLabel, "slot", "p11tool", "Slot Label")
-	rootCmd.PersistentFlags().StringVar(&slotPin, "pin", "", "Slot PIN")
+	rootCmd.PersistentFlags().StringVar(&slotLabel, "slot", "p11tool", "HSM slot Label")
+	rootCmd.PersistentFlags().StringVar(&slotPin, "pin", "", "HSM slot PIN (will be asked if not provided)")
 	rootCmd.PersistentFlags().StringVar(&keyType, "keyType", "EC", "Type of key (EC,RSA,GENERIC_SECRET,AES,SHA256_HMAC,SHA384_HMAC,DES3)")
 	rootCmd.PersistentFlags().BoolVar(&less, "less", true, "Don't show password preamble")
+	rootCmd.PersistentFlags().BoolVar(&lazyDebug, "debug", false, "Print debugging information")
 }
 
 // initP11Context initializes the PKCS#11 context and session
@@ -178,6 +180,7 @@ func (t *termInfo) askForPin(less bool) (slotPin string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("Error Getting PIN from Terminal: %v", err)
 	}
+
 	slotPin = string(bytePassword)
 	bytePassword = []byte{}
 	fmt.Println()
