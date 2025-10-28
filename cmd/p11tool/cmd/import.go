@@ -52,3 +52,30 @@ package cmd
 //	importCmd.Flags().StringVar(&keyStore, "keyStore", "file", "Keystore type (file, pkcs12)")
 //	importCmd.Flags().StringVar(&keyStorepass, "keyStorepass", "", "Keystore password")
 //}
+
+//	case "import":
+//		if *keyType == "RSA" {
+//			err = p11w.ImportRSAKeyFromFile(*keyFile, *keyStore)
+//			exitWhenError(err)
+//		} else if *keyType == "AES" ||
+//			*keyType == "GENERIC_SECRET" ||
+//			*keyType == "SHA256_HMAC" ||
+//			*keyType == "SHA384_HMAC" {
+//			err = p11w.ImportSymKey(*keyType, *key, *keyStore, *keyStorepass, *keyLabel)
+//			exitWhenError(err)
+//		} else {
+//			err = p11w.ImportECKeyFromFile(*keyFile, *keyStore, *keyStorepass, *keyLabel)
+//			exitWhenError(err)
+//		}
+//
+//	case "importCert":
+//		ec := pw.EcdsaKey{}
+//		c := pw.GetCert(*keyFile)
+//		ec.Certificate = c
+//		ec.SKI.Sha256 = *keyLabel
+//		Sha256Bytes, err := hex.DecodeString(ec.SKI.Sha256)
+//		exitWhenError(err)
+//		ec.SKI.Sha256Bytes = Sha256Bytes
+//		err = p11w.ImportCertificate(ec)
+//		exitWhenError(err)
+//
