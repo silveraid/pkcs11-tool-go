@@ -57,7 +57,7 @@ type termInfo struct {
 var rootCmd = &cobra.Command{
 	Use:   "p11tool",
 	Short: "A PKCS#11 tool for key management and operations",
-	Long: ` p11tool is a command-line utility for managing PKCS#11 tokens and performing
+	Long: `p11tool is a command-line utility for managing PKCS#11 tokens and performing
 cryptographic operations. It supports various key types including RSA, EC, and AES,
 and provides functionality for key generation, import/export, signing, and more.`,
 }
