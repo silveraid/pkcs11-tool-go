@@ -9,7 +9,7 @@ import (
 func main() {
 
 	// Print out header
-	fmt.Println("p11tool v0.0.5 (2025-10-28)")
+	fmt.Println("p11tool v0.0.6 (2025-10-28)")
 	fmt.Println("by George Bolo, Scott Alan, and Frank Felhoffer")
 	fmt.Println("-----------------------------------------------")
 	fmt.Println()
