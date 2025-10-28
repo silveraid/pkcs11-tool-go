@@ -59,26 +59,7 @@ Example usage:
 					log.Printf("Error parsing certificate: no public key found")
 					continue
 				}
-
-				// Extract the public key and calculate the SKI
-				switch pub := cert.PublicKey.(type) {
-				case *ecdsa.PublicKey:
-					fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
-					rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				case *rsa.PublicKey:
-					fmt.Printf("Found RSA public key (%v bits)\n", pub.N.BitLen())
-					rawBytes := pub.N.Bytes()
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				default:
-					log.Fatalf("Unsupported public key type: %T", pub)
-				}
-
-				// print out the details
-				fmt.Printf("SUBJECT: %s\n", cert.Subject)
-				fmt.Printf("ISSUER: %s\n", cert.Issuer)
+				calculateSKIfromPubKey(cert.PublicKey)
 
 			case "CERTIFICATE REQUEST":
 				req, err := x509.ParseCertificateRequest(block.Bytes)
@@ -90,26 +71,7 @@ Example usage:
 					log.Printf("Error parsing certificate request: no public key found")
 					continue
 				}
-
-				// Extract the public key and calculate the SKI
-				switch pub := req.PublicKey.(type) {
-				case *rsa.PublicKey:
-					fmt.Printf("Found RSA public key (%v bits)\n", pub.N.BitLen())
-					rawBytes := pub.N.Bytes()
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				case *ecdsa.PublicKey:
-					fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
-					rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				// Add other key types like ed25519.PublicKey if needed
-				default:
-					log.Fatalf("Unsupported public key type: %T", pub)
-				}
-
-				// print out the details
-				fmt.Printf("SUBJECT: %s\n", req.Subject)
+				calculateSKIfromPubKey(req.PublicKey)
 
 			case "PRIVATE KEY": // Generic private key
 				// Attempt to parse as PKCS#1 or PKCS#8
@@ -123,20 +85,11 @@ Example usage:
 				} else {
 					fmt.Printf("Could not parse private key: %v\n", err)
 				}
-				switch pub := publicKey.(type) {
-				case *rsa.PublicKey:
-					fmt.Printf("Found RSA public key (%v)\n", pub.N.BitLen())
-					rawBytes := pub.N.Bytes()
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				case *ecdsa.PublicKey:
-					fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
-					rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				default:
-					log.Fatalf("Unsupported public key type: %T", pub)
+				if publicKey == nil {
+					fmt.Printf("Error parsing private key: no public key found")
 				}
+				calculateSKIfromPubKey(publicKey)
+
 			case "RSA PRIVATE KEY": // Specific RSA private key (PKCS#1)
 				privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 				if err != nil {
@@ -144,20 +97,11 @@ Example usage:
 					continue
 				}
 				publicKey := privateKey.Public()
-				switch pub := publicKey.(type) {
-				case *rsa.PublicKey:
-					fmt.Printf("Found RSA public key (%v)\n", pub.N.BitLen())
-					rawBytes := pub.N.Bytes()
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				case *ecdsa.PublicKey:
-					fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
-					rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				default:
-					log.Fatalf("Unsupported public key type: %T", pub)
+				if publicKey == nil {
+					fmt.Printf("Error parsing RSA private key: no public key found")
 				}
+				calculateSKIfromPubKey(publicKey)
+
 			case "EC PRIVATE KEY":
 				privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 				if err != nil {
@@ -165,40 +109,19 @@ Example usage:
 					continue
 				}
 				publicKey := privateKey.Public()
-				switch pub := publicKey.(type) {
-				case *rsa.PublicKey:
-					fmt.Printf("Found RSA public key (%v)\n", pub.N.BitLen())
-					rawBytes := pub.N.Bytes()
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				case *ecdsa.PublicKey:
-					fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
-					rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				default:
-					log.Fatalf("Unsupported public key type: %T", pub)
+				if publicKey == nil {
+					fmt.Printf("Error parsing RSA private key: no public key found")
 				}
+				calculateSKIfromPubKey(publicKey)
+
 			case "PUBLIC KEY":
 				publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 				if err != nil {
 					fmt.Printf("Error parsing public key: %v\n", err)
 					continue
 				}
-				switch pub := publicKey.(type) {
-				case *rsa.PublicKey:
-					fmt.Printf("Found RSA public key (%v)\n", pub.N.BitLen())
-					rawBytes := pub.N.Bytes()
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				case *ecdsa.PublicKey:
-					fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
-					rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
-					fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
-					fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
-				default:
-					log.Fatalf("Unsupported public key type: %T", pub)
-				}
+				calculateSKIfromPubKey(publicKey)
+
 			default:
 				fmt.Printf("Unsupported or unknown block type: %s\n", block.Type)
 			}
@@ -212,4 +135,22 @@ func init() {
 	rootCmd.AddCommand(getSKICmd)
 	getSKICmd.Flags().StringVar(&inputFile, "inputFile", "", "Path of a PEM (pubKey, privKey, CSR, certificate) file")
 	getSKICmd.MarkFlagRequired("inputFile")
+}
+
+// calculateSKIfromPubKey Calculates SHA-1 and SHA-256 SKI values of a public key
+func calculateSKIfromPubKey(publicKey crypto.PublicKey) {
+	switch pub := publicKey.(type) {
+	case *rsa.PublicKey:
+		fmt.Printf("Found RSA public key (%v)\n", pub.N.BitLen())
+		rawBytes := pub.N.Bytes()
+		fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
+		fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
+	case *ecdsa.PublicKey:
+		fmt.Printf("Found ECDSA public key (%v)\n", pub.Curve.Params().Name)
+		rawBytes := elliptic.Marshal(pub.Curve, pub.X, pub.Y)
+		fmt.Printf("SKI SHA1: %x\n", sha1.Sum(rawBytes))
+		fmt.Printf("SKI SHA256: %x\n", sha256.Sum256(rawBytes))
+	default:
+		log.Fatalf("Unsupported public key type: %T", pub)
+	}
 }
