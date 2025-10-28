@@ -15,13 +15,6 @@ func main() {
 	cmd.Execute()
 }
 
-//// exit cleanly when error is no nil
-//func exitWhenError(err error) {
-//	if err != nil {
-//		fmt.Println("Error:", err)
-//		os.Exit(1)
-//	}
-//}
 //
 //type termInfo struct {
 //	termState *terminal.State
@@ -251,19 +244,7 @@ func main() {
 //		err = p11w.ImportCertificate(ec)
 //		exitWhenError(err)
 //
-//	case "generate":
-//		if *keyType == "RSA" {
-//			rsa := pw.RsaKey{}
-//			err := p11w.GenerateRSA(rsa, *keyLen, *keyLabel)
-//			exitWhenError(err)
-//		} else if *keyType == "EC" {
-//			ec := pw.EcdsaKey{}
-//			//TODO pass in from argument
-//			ec.NamedCurveAsString = "P-256"
-//			_, err := p11w.GenerateEC(ec)
-//			exitWhenError(err)
-//		}
-//
+
 //	case "deleteObj":
 //		if *objClass == "ALL" {
 //			p11w.DeleteObj("ALL", "")
@@ -459,41 +440,7 @@ func main() {
 //		exitWhenError(err)
 //		fmt.Printf("successfully decrypted ciptherText '%v' with CKM_AES_GCM and key with LABEL: %s\n ClearText %s\n", enc, *keyLabel, dec)
 //
-//	case "generateSecret":
-//		if *keyType == "GENERIC_SECRET" || *keyType == "SHA256_HMAC" || *keyType == "SHA384_HMAC" {
-//			//Generate Key
-//			symKey, err := p11w.CreateSymKey(*keyLabel, *keyLen, *keyType)
-//			exitWhenError(err)
-//			testMsg := []byte("someRandomString")
-//			hmac, err := p11w.SignHmacSha384(symKey, testMsg)
-//			exitWhenError(err)
-//			fmt.Printf("Successfully tested CKM_SHA384_HMAC on key with label: %s \n HMAC %x\n", *keyLabel, hmac)
-//			p11w.ListObjects(
-//				[]*pkcs11.Attribute{},
-//				*maxObjectsToList,
-//			)
-//
-//		}
-//
-//	case "generateAES":
-//		if *keyType == "AES" {
-//			//Generate Key
-//			_, err := p11w.CreateSymKey(*keyLabel, *keyLen, *keyType)
-//			exitWhenError(err)
-//			p11w.ListObjects(
-//				[]*pkcs11.Attribute{},
-//				*maxObjectsToList,
-//			)
-//
-//		}
-//
-//	case "generateDES":
-//		if *keyType == "DES3" {
-//			//Generate DES Key
-//			_, err := p11w.CreateSymKey(*keyLabel, *keyLen, *keyType)
-//			exitWhenError(err)
-//		}
-//
+
 //	case "testEc":
 //
 //		message := "Some Test Message"

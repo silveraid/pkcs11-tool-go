@@ -16,7 +16,7 @@ For example:
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		// FIXME
-		maxObjectsToList := 100
+		maxObjectsToList := 50
 
 		p11w, err := initP11Context()
 		if err != nil {

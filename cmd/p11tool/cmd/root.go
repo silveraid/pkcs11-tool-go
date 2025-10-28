@@ -192,3 +192,11 @@ func searchForLib(paths string) (string, error) {
 	}
 	return "", fmt.Errorf("no suitable paths for pkcs11 library found: %s", paths)
 }
+
+// exitWhenError exit cleanly when error is no nil
+func exitWhenError(err error) {
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+}
