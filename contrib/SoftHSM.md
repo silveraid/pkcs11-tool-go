@@ -15,7 +15,8 @@ brew install \
   openssl \
   sqlite \
   cppunit \
-  libtool
+  libtool \
+  gcc
 ```
 
 #### Clone the source code
