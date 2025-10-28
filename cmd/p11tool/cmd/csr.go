@@ -5,14 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	pw "github.com/scottallan/p11tool-new/pkg/pkcs11wrapper"
 	"github.com/spf13/cobra"
 )
-
-type csrSubjectStruct struct {
-}
 
 // csrCmd represents the generate key command
 var csrCmd = &cobra.Command{
@@ -70,15 +66,8 @@ Example usage:
 		exitWhenError(err)
 
 		// Save the CSR on the filesystem
-		outFile, err := os.Create("/tmp/csr.pem")
-		if err != nil {
-			fmt.Printf("Unable to write CSR %s", err.Error())
-			return err
-		}
-		defer outFile.Close()
-
-		fmt.Printf("writing csr to %s\n", "/tmp/csr.pem")
-		err = ioutil.WriteFile("/tmp/csr.pem", csr, 0644)
+		fmt.Printf("writing csr to %s\n", csrFile)
+		err = ioutil.WriteFile(csrFile, csr, 0644)
 		if err != nil {
 			return err
 		}
@@ -91,8 +80,7 @@ func init() {
 	rootCmd.AddCommand(csrCmd)
 	csrCmd.Flags().StringVar(&csrSubject, "subject", "", "Subject line parameters of the CSR")
 	csrCmd.Flags().StringVar(&keyLabel, "keyLabel", "", "Label for the key to be used")
-	//csrCmd.Flags().StringVar(&fileOut, "fileOut", "", "Path ")
+	csrCmd.Flags().StringVar(&csrFile, "csrFile", "/tmp/csr.pem", "Path of the PEM file containing the generated CSR")
 	csrCmd.MarkFlagRequired("csrSubject")
 	csrCmd.MarkFlagRequired("keyLabel")
-	//csrCmd.MarkFlagRequired("fileOut")
 }

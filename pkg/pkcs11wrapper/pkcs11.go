@@ -117,7 +117,7 @@ type Name struct {
 	L            string `json:"l" yaml:"ST"`  // Locality
 	O            string `json:"o" yaml:"O"`   // OrganisationName
 	OU           string `json:"ou" yaml:"OU"` // OrganisationalUnitName
-	SerialNumber string `json:"serialnumber" yame:"serialnumber"`
+	SerialNumber string `json:"serialnumber" yaml:"serialnumber"`
 }
 
 // A KeyRequest is a generic request for a new key.

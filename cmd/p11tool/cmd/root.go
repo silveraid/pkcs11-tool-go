@@ -34,7 +34,7 @@ var (
 	keyStore      string
 	keyStorepass  string
 	key           string
-	csrInfo       string
+	csrFile       string
 	csrSubject    string
 	wrapKey       string
 	objClass      string
