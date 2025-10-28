@@ -4,11 +4,62 @@ _This file contains instructions about how to start working with SoftHSM._
 
 ## MacOS
 
-### Install softhsm with homebrew
+### Install softhsm from source code
+
+#### Install the pre-requisites
+
+```bash
+brew install \
+  automake \
+  pkg-config \
+  openssl \
+  sqlite \
+  cppunit \
+  libtool
+```
+
+#### Clone the source code
+
+```bash
+git clone https://github.com/softhsm/SoftHSMv2.git
+```
+
+_Make sure you end up on the branch called "develop" ..._
+
+#### Compile the source code
+
+Set the compiler first, whatever comes with x-code does not seem to work. The following exports do depend on the
+version of software which was installed by homebrew!
+
+```bash
+export CC=/opt/homebrew/bin/gcc-15
+export CXX=/opt/homebrew/bin/g++-15
+export CPP=/opt/homebrew/bin/c++-15
+```
+
+Generate the config for the compilation. Notice that I point it to the openssl installation what homebrew installed
+so it will probably needs to get adjusted time to time, also I added the `--prefix` parameter to get this installed
+into my home folder.
+
+```bash
+./autogen.sh
+./configure --with-openssl=/opt/homebrew/Cellar/openssl\@3/3.6.0 --prefix=~/softhsm
+```
+
+Get it compiled and installed.
+
+```bash
+make -j4
+make install
+```
+
+### Install softhsm with homebrew (DOES NOT WORK)
 
 ```bash
 brew install softhsm
 ```
+
+## Working with softhsm
 
 ### Create configuration and token directory
 
