@@ -35,6 +35,7 @@ var (
 	keyStorepass  string
 	key           string
 	csrInfo       string
+	csrSubject    string
 	wrapKey       string
 	objClass      string
 	outF          string
@@ -110,7 +111,8 @@ func initP11Context() (*pw.Pkcs11Wrapper, error) {
 	}
 
 	fmt.Printf("Using PKCS#11 library: %s\n", p11Lib)
-	fmt.Printf("Using Slot: %s\n", slotLabel)
+	fmt.Printf("Using PKCS#11 slot: %s\n", slotLabel)
+	fmt.Println("---")
 
 	// override command line parameter with environment variable
 	if x, y := os.LookupEnv("P11TOOL_SLOT_PIN"); y {
@@ -200,3 +202,63 @@ func exitWhenError(err error) {
 		os.Exit(1)
 	}
 }
+
+//
+//type termInfo struct {
+//	termState *terminal.State
+//	curState  *terminal.State
+//}
+//
+//
+//func (t *termInfo) askForPin(less bool) (slotPin string, err error) {
+//	//Start Fun Message for Security.  Note we dont do any of this and simply use terminal package to read in password
+//	if !less {
+//		fmt.Printf("***High Security Password Mode Detected***\n\n***Preparing SecureRandom Encrypted Memory Space***\n")
+//		for i := 1; i <= 10; i++ {
+//			if math.Mod(float64(i), 2) == 1 {
+//				fmt.Printf(". %d%%", i*10)
+//			} else {
+//				fmt.Print("...")
+//			}
+//			time.Sleep(500 * time.Millisecond)
+//		}
+//	}
+//	fmt.Printf("\nEnter Token Password (Pin):")
+//	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+//
+//	if err != nil {
+//		fmt.Println("Error Getting PIN from Terminal", err)
+//		return
+//	}
+//	slotPin = string(bytePassword)
+//	bytePassword = []byte{}
+//	fmt.Println() // it's necessary to add a new line after user's input
+//	return
+//}
+//
+//func (t *termInfo) cleanupPin(slotPin string, p11Pin *string, less bool) {
+//	if slotPin == "" {
+//		if !less {
+//			//Output Fun message for Security.  Note we dont do this scrubbing and simply blank the password before exiting
+//			fmt.Printf("\n\n*********Srubbing Encrypted Memory Space for Secure Pin*********\n\n*********Writing Random 0's and 1's across 1,000,000 loops to Encrypted Memory Location!!!*********\n\nCLEANING:")
+//			for i := 1; i <= 10; i++ {
+//				if math.Mod(float64(i), 2) == 1 {
+//					fmt.Printf("... %d writes complete...", i*100000)
+//				} else {
+//					fmt.Print("...")
+//				}
+//				time.Sleep(500 * time.Millisecond)
+//				if i == 10 {
+//					fmt.Println("1,000,000 writes complete... EXITING\n")
+//				}
+//			}
+//		}
+//	}
+//	*p11Pin = ""
+//}
+//
+///*CaseInsensitiveContains Returns true if substr is in string s */
+//func CaseInsensitiveContains(s, substr string) bool {
+//	s, substr = strings.ToUpper(s), strings.ToUpper(substr)
+//	return strings.Contains(s, substr)
+//}

@@ -11,6 +11,8 @@ func main() {
 	// Print out header
 	fmt.Println("p11tool v0.0.5 (2025-10-28)")
 	fmt.Println("by George Bolo, Scott Alan, and Frank Felhoffer")
+	fmt.Println("-----------------------------------------------")
+	fmt.Println()
 
 	// Cobra to do it's magic
 	cmd.Execute()
@@ -127,41 +129,6 @@ func main() {
 //	switch *action {
 //
 
-//
-//	case "generateCSR":
-//
-//		if *keyType == "RSA" {
-//			//rsa := pw.RsaKey{}
-//			//_, _, err = p11w.GenCSR(rsa)
-//			//TODO generate and sign RSA
-//
-//		} else if *keyType == "EC" {
-//			ec := pw.EcdsaKey{}
-//			ec.SKI.Sha256 = *keyLabel
-//
-//			csrInfo := ec.GetCSRInfo(*csrInfo)
-//			/*ec.Req = &pw.CSRInfo{
-//				Names: []pw.Name{names},
-//				Hosts: hosts.Hosts,
-//			}*/
-//			ec.Req = &csrInfo
-//
-//			fmt.Println(pw.ToJson(csrInfo))
-//
-//			csr, _, err := p11w.GenCSR(ec)
-//			exitWhenError(err)
-//			outFile, err := os.Create(*outF)
-//			if err != nil {
-//				fmt.Printf("Unable to write CSR %s", err.Error())
-//				return
-//			}
-//			defer outFile.Close()
-//			fmt.Printf("writing csr to %s\n", *outF)
-//			err = ioutil.WriteFile(*outF, csr, 0644)
-//			if err != nil {
-//				return
-//			}
-//		}
 //
 //	case "generateAndImport":
 //		if *keyType == "RSA" {
