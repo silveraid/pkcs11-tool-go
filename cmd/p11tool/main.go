@@ -2,9 +2,18 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/scottallan/p11tool-new/cmd/p11tool/cmd"
+	"golang.org/x/crypto/ssh/terminal"
 )
+
+type termInfo struct {
+	termState *terminal.State
+	curState  *terminal.State
+}
 
 func main() {
 
@@ -13,6 +22,37 @@ func main() {
 	fmt.Println("by George Bolo, Scott Alan, and Frank Felhoffer")
 	fmt.Println("-----------------------------------------------")
 	fmt.Println()
+
+	var gracefulStop = make(chan os.Signal)
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+	signal.Notify(gracefulStop, syscall.SIGINT)
+
+	//Neet to Get State of the Existing Terminal
+	termState := termInfo{}
+	tState, err := terminal.GetState(int(syscall.Stdin))
+	if err != nil {
+		fmt.Println("Failed to get terminal state")
+		os.Exit(1)
+	}
+	termState.termState = tState
+	go func() {
+		sig := <-gracefulStop
+		var err error
+		fmt.Printf("\n**********caught signal: %+v  EXITING\n", sig)
+		cState, err := terminal.GetState(int(syscall.Stdin))
+		if err != nil {
+			panic(err)
+		}
+		termState.curState = cState
+		if termState.curState == termState.termState {
+			fmt.Println("Terminal State OK!  Exiting Normally")
+			panic(err)
+		} else {
+			fmt.Printf("Terminal State Changed!\n[Current State: %v]\n[Original State :%v] Reverting before Exiting\n", *termState.curState, *termState.termState)
+			err = terminal.Restore(int(syscall.Stdin), termState.termState)
+			panic(err)
+		}
+	}()
 
 	// Cobra to do it's magic
 	cmd.Execute()
@@ -46,78 +86,6 @@ func main() {
 //
 //	maxObjectsToList := flag.Int("maxObjectsToList", 50, "Paramter to be used with -action list to specify how many objects to print")
 //
-//	var gracefulStop = make(chan os.Signal)
-//	signal.Notify(gracefulStop, syscall.SIGTERM)
-//	signal.Notify(gracefulStop, syscall.SIGINT)
-//
-//	flag.Parse()
-//
-//	var err error
-//	//Neet to Get State of the Existing Terminal
-//	termState := termInfo{}
-//	tState, err := terminal.GetState(int(syscall.Stdin))
-//	termState.termState = tState
-//	go func() {
-//		sig := <-gracefulStop
-//		var err error
-//		fmt.Printf("\n**********caught signal: %+v  EXITING\n", sig)
-//		cState, err := terminal.GetState(int(syscall.Stdin))
-//		if err != nil {
-//			panic(err)
-//		}
-//		termState.curState = cState
-//		if termState.curState == termState.termState {
-//			fmt.Println("Terminal State OK!  Exiting Normally")
-//			panic(err)
-//		} else {
-//			fmt.Printf("Terminal State Changed!\n[Current State: %v]\n[Original State :%v] Reverting before Exiting\n", *termState.curState, *termState.termState)
-//			err = terminal.Restore(int(syscall.Stdin), termState.termState)
-//			panic(err)
-//		}
-//	}()
-//
-//	// complete actions which do not require HSM
-//	switch *action {
-//
-//
-//	// complete actions which require HSM
-//
-//	// initialize pkcs11
-//	var p11Lib string
-//	var p11Pin string
-//
-//	if *pkcs11Library == "" {
-//		p11Lib, err = searchForLib(defaultLibPaths)
-//		exitWhenError(err)
-//	} else {
-//		p11Lib, err = searchForLib(*pkcs11Library)
-//		exitWhenError(err)
-//	}
-//	if *slotPin == "" {
-//		p11Pin, err = termState.askForPin(*less)
-//		if err != nil {
-//			exitWhenError(err)
-//		}
-//	} else {
-//		p11Pin = *slotPin
-//	}
-//
-//	p11w = pw.Pkcs11Wrapper{
-//		Library: pw.Pkcs11Library{
-//			Path: p11Lib,
-//		},
-//		SlotLabel: *slotLabel,
-//		SlotPin:   p11Pin,
-//	}
-//
-//	err = p11w.InitContext()
-//	exitWhenError(err)
-//
-//	err = p11w.InitSession()
-//	exitWhenError(err)
-//
-//	err = p11w.Login()
-//	exitWhenError(err)
 //
 //	// defer cleanup
 //	defer p11w.Context.Destroy()
@@ -125,20 +93,4 @@ func main() {
 //	defer p11w.Context.CloseSession(p11w.Session)
 //	defer p11w.Context.Logout(p11w.Session)
 //	defer termState.cleanupPin(*slotPin, &p11Pin, *less)
-//
-//	switch *action {
-//
-
-//
-//	case "generateAndImport":
-//		if *keyType == "RSA" {
-//			rsa := pw.RsaKey{}
-//			rsa.Generate(2048)
-//			p11w.ImportRSAKey(rsa)
-//		} else {
-//			ec := pw.EcdsaKey{}
-//			// TODO: fix non working curves (P-521)
-//			ec.Generate("P-256")
-//			p11w.ImportECKey(ec)
-//		}
 //
