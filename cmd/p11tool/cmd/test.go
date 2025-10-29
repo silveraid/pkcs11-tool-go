@@ -66,6 +66,24 @@ var testCmd = &cobra.Command{
 			// Delete the created key
 			p11w.DeleteObj("CKO_SECRET_KEY", newAESKeyLabel)
 
+		case "HMAC384":
+			pkcs11_attr := pkcs11.NewAttribute(pkcs11.CKA_LABEL, keyLabel)
+			p11w.ListObjects(
+				[]*pkcs11.Attribute{
+					pkcs11_attr,
+				}, maxObjectLimit,
+			)
+			o, _, err := p11w.FindObjects([]*pkcs11.Attribute{
+				pkcs11.NewAttribute(pkcs11.CKA_LABEL, keyLabel),
+			},
+				1,
+			)
+			exitWhenError(err)
+			testMsg := []byte("someRandomString")
+			hmac, err := p11w.SignHmacSha384(o[0], testMsg)
+			exitWhenError(err)
+			fmt.Printf("successfully tested CKM_SHA384_HMAC on key with LABEL: %s\n HMAC %x\n", keyLabel, hmac)
+
 		case "EC":
 			return fmt.Errorf("test case not implemented: %s", testCase)
 		//	case "testEc":
@@ -178,7 +196,8 @@ var testCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(testCmd)
-	testCmd.Flags().StringVar(&testCase, "testcase", "", "Test case to execute (AESGCM, EC, RSA)")
+	testCmd.Flags().StringVar(&testCase, "testcase", "", "Test case to execute (AESGCM, HMAC384, EC, RSA)")
+	testCmd.Flags().StringVar(&keyLabel, "keyLabel", "", "Label for the generated key")
 	testCmd.Flags().IntVar(&maxObjectLimit, "limit", 50, "Maximum number of objects to list")
 	testCmd.MarkFlagRequired("testCase")
 }
