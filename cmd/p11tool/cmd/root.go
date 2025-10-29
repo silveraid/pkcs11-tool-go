@@ -91,6 +91,13 @@ func initP11Context() (*pw.Pkcs11Wrapper, error) {
 		pkcs11Library = x
 	}
 
+	// try to load the hyperledger fabric variable
+	if pkcs11Library == "" {
+		if x, y := os.LookupEnv("FABRIC_SDK_CLIENT_BCCSP_SECURITY_LIBRARY"); y {
+			pkcs11Library = x
+		}
+	}
+
 	if pkcs11Library == "" {
 		// The PKCS11 library has no value, let's try to find a library by
 		// testing all the possible locations.
@@ -111,6 +118,13 @@ func initP11Context() (*pw.Pkcs11Wrapper, error) {
 		slotLabel = x
 	}
 
+	// try to load the hyperledger fabric variable
+	if slotLabel != "p111tool" {
+		if x, y := os.LookupEnv("FABRIC_SDK_CLIENT_BCCSP_SECURITY_LABEL"); y {
+			slotLabel = x
+		}
+	}
+
 	fmt.Printf("Using PKCS#11 library: %s\n", p11Lib)
 	fmt.Printf("Using PKCS#11 slot: %s\n", slotLabel)
 	fmt.Println("---")
@@ -118,6 +132,13 @@ func initP11Context() (*pw.Pkcs11Wrapper, error) {
 	// override command line parameter with environment variable
 	if x, y := os.LookupEnv("P11TOOL_SLOT_PIN"); y {
 		slotPin = x
+	}
+
+	// try to load the hyperledger fabric variable
+	if slotPin == "" {
+		if x, y := os.LookupEnv("FABRIC_SDK_CLIENT_BCCSP_SECURITY_PIN"); y {
+			slotPin = x
+		}
 	}
 
 	if slotPin == "" {
