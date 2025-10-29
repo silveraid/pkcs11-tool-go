@@ -54,6 +54,6 @@ Example usage:
 
 func init() {
 	rootCmd.AddCommand(rmCmd)
-	rmCmd.Flags().StringVar(&ckaClass, "ckaClass", "", "CKA CLASS (ALL, CKO_PUBLIC_KEY, CKO_PRIVATE_KEY, ")
+	rmCmd.Flags().StringVar(&ckaClass, "ckaClass", "", "CKA CLASS (ALL, CKO_PUBLIC_KEY, CKO_PRIVATE_KEY, CKO_SECRET_KEY)")
 	rmCmd.Flags().StringVar(&keyLabel, "keyLabel", "", "Key label (aka. CKA LABEL)")
 }

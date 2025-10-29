@@ -91,6 +91,7 @@ Example usage:
 func init() {
 	rootCmd.AddCommand(genKeyCmd)
 	genKeyCmd.Flags().StringVar(&keyLabel, "keyLabel", "", "Label for the generated key")
-	genKeyCmd.Flags().IntVar(&keyLen, "keyLen", 0, "Key length in bits (required for RSA, AES, and HMAC keys)")
+	genKeyCmd.Flags().IntVar(&keyLen, "keyLen", 32, "Key length in bits (required for RSA, AES, and HMAC keys)")
+	genKeyCmd.Flags().StringVar(&keyType, "keyType", "EC", "Type of key (EC,RSA,GENERIC_SECRET,AES,SHA256_HMAC,SHA384_HMAC,DES3)")
 	genKeyCmd.MarkFlagRequired("keyLabel")
 }

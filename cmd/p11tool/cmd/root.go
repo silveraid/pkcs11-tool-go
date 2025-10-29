@@ -76,7 +76,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&pkcs11Library, "lib", "", "Location of pkcs11 library")
 	rootCmd.PersistentFlags().StringVar(&slotLabel, "slot", "p11tool", "HSM slot Label")
 	rootCmd.PersistentFlags().StringVar(&slotPin, "pin", "", "HSM slot PIN (will be asked if not provided)")
-	rootCmd.PersistentFlags().StringVar(&keyType, "keyType", "EC", "Type of key (EC,RSA,GENERIC_SECRET,AES,SHA256_HMAC,SHA384_HMAC,DES3)")
 	rootCmd.PersistentFlags().BoolVar(&less, "less", true, "Don't show password preamble")
 	rootCmd.PersistentFlags().BoolVar(&lazyDebug, "debug", false, "Print debugging information")
 }
